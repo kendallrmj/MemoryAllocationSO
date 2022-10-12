@@ -1,9 +1,6 @@
-import random
-
 class Process:
 
-    def __init__(self, memQuantity, execTime, seed):
-        random.seed(seed)
+    def __init__(self, memQuantity, execTime):
         self.setMemQuantity(memQuantity)
         self.setExecTime(execTime)
         self.setHeap([])
