@@ -1,6 +1,3 @@
-from Process import Process
-
-
 class FirstFit:
 
     def __init__(self, memory):
@@ -32,7 +29,6 @@ class FirstFit:
                 if(block[2] >= processBlockSize):
                     newBlock = []
                     index = self.getMemory().index(block)
-                    tempBlockSize = block[2]
                     newBlock.append('P')
                     newBlock.append(block[1])
                     newBlock.append(processBlockSize)
@@ -44,7 +40,9 @@ class FirstFit:
             
 
     def addRefusedProcess(self, refusedProcess):
-        self.setRefusedProcesses(self.getRefusedProcesses().append(refusedProcess))
+        tempList = self.getRefusedProcesses()
+        tempList.append(refusedProcess)
+        self.setRefusedProcesses(tempList)
     
     def removeFromMemory(self, e):
         tempMem = self.getMemory()
@@ -67,5 +65,6 @@ class FirstFit:
         tempMem = self.getMemory()
         tempMem.insert(index, e)
         tempMem.remove(tempBlock)
-        tempMem.insert(index + 1, ['E', e[1] + e[2], tempBlock[2] - e[2]])
+        if(tempBlock[2] > 0):
+            tempMem.insert(index + 1, ['E', e[1] + e[2], tempBlock[2] - e[2]])
         self.setMemory(tempMem)
