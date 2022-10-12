@@ -1,7 +1,9 @@
 class WorstFit:
 
-    def __init__(self, memory):
-        self.setMemory(memory)
+    def __init__(self, memorySize):
+        # BLOCK = ['E' for empty or 'P' for process, startPos, blockSize]
+        self.setMemory([['E', 0, memorySize]])
+        self.setMemorySize(memorySize)
         self.setRefusedProcesses([])
     
     # GETTERS
@@ -11,6 +13,9 @@ class WorstFit:
     def getRefusedProcesses(self):
         return self.__refusedProcesses
 
+    def getMemorySize(self):
+        return self.__memorySize
+
 
     # SETTERS
     def setMemory(self, memory):
@@ -18,6 +23,9 @@ class WorstFit:
 
     def setRefusedProcesses(self, refusedProcesses):
         self.__refusedProcesses = refusedProcesses
+
+    def setMemorySize(self, memorySize):
+        self.__memorySize = memorySize
 
 
     # FUNCTIONS

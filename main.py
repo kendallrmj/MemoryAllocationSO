@@ -3,6 +3,7 @@ from Process import Process
 from FirstFit import FirstFit
 from BestFit import BestFit
 from WorstFit import WorstFit
+from Draw import draw
 
 dicProcesses = {}
 
@@ -17,18 +18,17 @@ def createProcesses(nProcesses, seed):
 if __name__ == '__main__':
     dicProcesses = createProcesses(4, 10)
 
-    # BLOCK = ['E' for empty or 'P' for process, startPos, blockSize]
-    firstFit = FirstFit([['E', 0, 1000]])
-    bestFit = BestFit([['E', 0, 1000]])
-    worstFit = WorstFit([['E', 0, 1000]])
+    firstFit = FirstFit(1000)
+    bestFit = BestFit(1000)
+    worstFit = WorstFit(1000)
 
     # FIRST FIT SIMULATION
-    # for process in dicProcesses:
-    #     print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
-    #     print("ANTES:\t\t" + str(firstFit.getMemory()))
-    #     firstFit.allocate(dicProcesses[process])
-    #     print("DESPUES:\t" + str(firstFit.getMemory()))
-    #     print('\n')
+    for process in dicProcesses:
+        print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
+        print("ANTES:\t\t" + str(firstFit.getMemory()))
+        firstFit.allocate(dicProcesses[process])
+        print("DESPUES:\t" + str(firstFit.getMemory()))
+        print('\n')
 
     # print("Remove process2:")
     # print("ANTES:\t\t" + str(firstFit.getMemory()))
@@ -63,22 +63,23 @@ if __name__ == '__main__':
     # print('\n')
 
     # WORST FIT SIMULATION
-    for process in dicProcesses:
-        print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
-        print("ANTES:\t\t" + str(worstFit.getMemory()))
-        worstFit.allocate(dicProcesses[process])
-        print("DESPUES:\t" + str(worstFit.getMemory()))
-        print('\n')
+    # for process in dicProcesses:
+    #     print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
+    #     print("ANTES:\t\t" + str(worstFit.getMemory()))
+    #     worstFit.allocate(dicProcesses[process])
+    #     print("DESPUES:\t" + str(worstFit.getMemory()))
+    #     print('\n')
 
-    print("Remove process2:")
-    print("ANTES:\t\t" + str(worstFit.getMemory()))
-    worstFit.removeFromMemory(worstFit.getMemory()[2])
-    print("DESPUES:\t" + str(worstFit.getMemory()))
-    print('\n')
+    # print("Remove process2:")
+    # print("ANTES:\t\t" + str(worstFit.getMemory()))
+    # worstFit.removeFromMemory(worstFit.getMemory()[2])
+    # print("DESPUES:\t" + str(worstFit.getMemory()))
+    # print('\n')
 
-    print("Remove process3:")
-    print("ANTES:\t\t" + str(worstFit.getMemory()))
-    worstFit.removeFromMemory(worstFit.getMemory()[3])
-    print("DESPUES:\t" + str(worstFit.getMemory()))
-    print('\n')
+    # print("Remove process3:")
+    # print("ANTES:\t\t" + str(worstFit.getMemory()))
+    # worstFit.removeFromMemory(worstFit.getMemory()[3])
+    # print("DESPUES:\t" + str(worstFit.getMemory()))
+    # print('\n')
     
+    draw(firstFit.getMemory(), firstFit.getMemory(), firstFit.getMemory(), firstFit.getMemory())
