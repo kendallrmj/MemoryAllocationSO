@@ -1,4 +1,4 @@
-class FirstFit:
+class BuddySystem:
 
     def __init__(self, memorySize):
         # BLOCK = ['E' for empty or 'P' for process, startPos, blockSize]
@@ -31,9 +31,11 @@ class FirstFit:
     # FUNCTIONS
     def allocate(self, processName, processBlockSize):
         isAsigned = False
+        processBlockSize = self.getIdealSize(processBlockSize)
+        validStartPositions = self.getValidStartPositions(processBlockSize)
         for block in self.getMemory():
             if(block[0] == 'E' and not isAsigned):
-                if(block[2] >= processBlockSize):
+                if((block[1] in validStartPositions) and (block[2] >= processBlockSize)):
                     newBlock = []
                     index = self.getMemory().index(block)
                     newBlock.append(processName)
@@ -42,9 +44,44 @@ class FirstFit:
                     self.insertInMemory(index, newBlock)
                     isAsigned = True
                     break
+                else:
+                    for startPos in validStartPositions:
+                        if((startPos > block[1]) and (block[2] - (startPos - block[1])) >= processBlockSize):
+                            newBlock = []
+                            index = self.getMemory().index(block)
+                            newBlock.append('E')
+                            newBlock.append(block[1])
+                            newBlock.append(startPos - block[1])
+                            self.insertInMemory(index, newBlock)
+
+                            newBlock = []
+                            index += 1
+                            newBlock.append(processName)
+                            newBlock.append(startPos)
+                            newBlock.append(processBlockSize)
+                            self.insertInMemory(index, newBlock)
+
+                            isAsigned = True
+                            break
+                    
         if not isAsigned:
             self.addRefusedProcess(processName)
             
+    def getIdealSize(self, blockSize):
+        potencia = 0
+        res = 2 ** potencia
+        while(res < blockSize):
+            potencia += 1
+            res = 2 ** potencia
+        return res
+
+    def getValidStartPositions(self, blockSize):
+        L = []
+        res = 0
+        while(res < self.getMemorySize()):
+            L.append(res)
+            res += blockSize
+        return L
 
     def addRefusedProcess(self, refusedProcess):
         tempList = self.getRefusedProcesses()

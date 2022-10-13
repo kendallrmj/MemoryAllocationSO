@@ -29,10 +29,9 @@ class BestFit:
 
 
     # FUNCTIONS
-    def allocate(self, process):
+    def allocate(self, processName, processBlockSize):
         isAsigned = False
         bestFit = 0
-        processBlockSize = process.getMemQuantity()
         for block in self.getMemory():
             if(block[0] == 'E'):
                 if(block[2] >= processBlockSize):
@@ -42,12 +41,12 @@ class BestFit:
         if isAsigned:
             newBlock = []
             index = self.getMemory().index(bestFit)
-            newBlock.append('P')
+            newBlock.append(processName)
             newBlock.append(bestFit[1])
             newBlock.append(processBlockSize)
             self.insertInMemory(index, newBlock)
         else:
-            self.addRefusedProcess(process)
+            self.addRefusedProcess(processName)
     
     def addRefusedProcess(self, refusedProcess):
         tempList = self.getRefusedProcesses()
@@ -75,6 +74,6 @@ class BestFit:
         tempMem = self.getMemory()
         tempMem.insert(index, e)
         tempMem.remove(tempBlock)
-        if(tempBlock[2] > 0):
+        if(tempBlock[2] > 0 and (tempBlock[2] - e[2]) > 0):
             tempMem.insert(index + 1, ['E', e[1] + e[2], tempBlock[2] - e[2]])
         self.setMemory(tempMem)
