@@ -12,7 +12,7 @@ def createProcesses(nProcesses, seed):
     dic = {}
     random.seed(seed)
     for i in range(nProcesses):
-        dic["process" + str(i)] = Process(random.randint(1,256), random.randint(30,300))
+        dic["P" + str(i)] = Process(random.randint(1,256), random.randint(30,300))
     return dic
 
 

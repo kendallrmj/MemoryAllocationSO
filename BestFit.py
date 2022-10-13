@@ -46,6 +46,9 @@ class BestFit:
             newBlock.append(processBlockSize)
             self.insertInMemory(index, newBlock)
         else:
+            for block in self.getMemory():
+                if(block[0] == processName):
+                    self.removeFromMemory(block)
             self.addRefusedProcess(processName)
     
     def addRefusedProcess(self, refusedProcess):
@@ -77,3 +80,12 @@ class BestFit:
         if(tempBlock[2] > 0 and (tempBlock[2] - e[2]) > 0):
             tempMem.insert(index + 1, ['E', e[1] + e[2], tempBlock[2] - e[2]])
         self.setMemory(tempMem)
+
+    def getMemStatus(self):
+        quantity = 0
+        freeMem = 0
+        for segment in self.getMemory():
+            if(segment[0] == 'E'):
+                quantity += 1
+                freeMem += segment[2]
+        return quantity, freeMem
