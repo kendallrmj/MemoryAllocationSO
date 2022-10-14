@@ -3,8 +3,7 @@ class Process:
     def __init__(self, memQuantity, execTime):
         self.setMemQuantity(memQuantity)
         self.setExecTime(execTime)
-        self.setHeap([])
-        self.setHasFinished(False)
+        self.setHeap({})
 
 
     # GETTERS
@@ -17,9 +16,6 @@ class Process:
     def getHeap(self):
         return self.__heap
 
-    def getHasFinished(self):
-        return self.__hasFinished
-
 
     # SETTERS
     def setMemQuantity(self, memQuantity):
@@ -31,5 +27,12 @@ class Process:
     def setHeap(self, heap):
         self.__heap = heap
 
-    def setHasFinished(self, hasFinished):
-        self.__hasFinished = hasFinished
+    def addToHeap(self, memQuantity):
+        tempDic = self.getHeap()
+        tempDic[str(len(tempDic))] = memQuantity
+        self.setHeap(tempDic)
+
+    def removeFromHeap(self, heapKey):
+        tempDic = self.getHeap()
+        del tempDic[heapKey]
+        self.setHeap(tempDic)

@@ -30,45 +30,44 @@ class BuddySystem:
 
     # FUNCTIONS
     def allocate(self, processName, processBlockSize):
-        isAsigned = False
-        processBlockSize = self.getIdealSize(processBlockSize)
-        validStartPositions = self.getValidStartPositions(processBlockSize)
-        for block in self.getMemory():
-            if(block[0] == 'E' and not isAsigned):
-                if((block[1] in validStartPositions) and (block[2] >= processBlockSize)):
-                    newBlock = []
-                    index = self.getMemory().index(block)
-                    newBlock.append(processName)
-                    newBlock.append(block[1])
-                    newBlock.append(processBlockSize)
-                    self.insertInMemory(index, newBlock)
-                    isAsigned = True
-                    break
-                else:
-                    for startPos in validStartPositions:
-                        if((startPos > block[1]) and (block[2] - (startPos - block[1])) >= processBlockSize):
-                            newBlock = []
-                            index = self.getMemory().index(block)
-                            newBlock.append('E')
-                            newBlock.append(block[1])
-                            newBlock.append(startPos - block[1])
-                            self.insertInMemory(index, newBlock)
-
-                            newBlock = []
-                            index += 1
-                            newBlock.append(processName)
-                            newBlock.append(startPos)
-                            newBlock.append(processBlockSize)
-                            self.insertInMemory(index, newBlock)
-
-                            isAsigned = True
-                            break
-                    
-        if not isAsigned:
+        if(processName not in self.getRefusedProcesses()):
+            isAsigned = False
+            processBlockSize = self.getIdealSize(processBlockSize)
+            validStartPositions = self.getValidStartPositions(processBlockSize)
             for block in self.getMemory():
-                if(block[0] == processName):
-                    self.removeFromMemory(block)
-            self.addRefusedProcess(processName)
+                if(block[0] == 'E' and not isAsigned):
+                    if((block[1] in validStartPositions) and (block[2] >= processBlockSize)):
+                        newBlock = []
+                        index = self.getMemory().index(block)
+                        newBlock.append(processName)
+                        newBlock.append(block[1])
+                        newBlock.append(processBlockSize)
+                        self.insertInMemory(index, newBlock)
+                        isAsigned = True
+                        break
+                    else:
+                        for startPos in validStartPositions:
+                            if((startPos > block[1]) and (block[2] - (startPos - block[1])) >= processBlockSize):
+                                newBlock = []
+                                index = self.getMemory().index(block)
+                                newBlock.append('E')
+                                newBlock.append(block[1])
+                                newBlock.append(startPos - block[1])
+                                self.insertInMemory(index, newBlock)
+
+                                newBlock = []
+                                index += 1
+                                newBlock.append(processName)
+                                newBlock.append(startPos)
+                                newBlock.append(processBlockSize)
+                                self.insertInMemory(index, newBlock)
+
+                                isAsigned = True
+                                break
+                        
+            if not isAsigned:
+                self.killProcess(processName)
+                self.addRefusedProcess(processName)
             
     def getIdealSize(self, blockSize):
         potencia = 0
@@ -124,3 +123,9 @@ class BuddySystem:
                 quantity += 1
                 freeMem += segment[2]
         return quantity, freeMem
+
+    def killProcess(self, processName):
+        currentMemory = self.getMemory()
+        for block in currentMemory:
+            if(block[0] == processName):
+                self.removeFromMemory(block)

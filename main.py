@@ -1,107 +1,84 @@
 import random
+import time
+import threading
+
 from Process import Process
 from FirstFit import FirstFit
 from BestFit import BestFit
 from WorstFit import WorstFit
 from BuddySystem import BuddySystem
-from Draw import draw
+from Queue import Queue
+from Draw import Draw
 
 dicProcesses = {}
+dicProcessesTimes = {}
+processQueue = Queue()
+
+firstFit = FirstFit(1024)
+bestFit = BestFit(1024)
+worstFit = WorstFit(1024)
+buddySystem = BuddySystem(1024)
 
 def createProcesses(nProcesses, seed):
-    dic = {}
     random.seed(seed)
     for i in range(nProcesses):
-        dic["P" + str(i)] = Process(random.randint(1,256), random.randint(30,300))
-    return dic
+        initialMem = random.randint(1,128)
+        execTime = random.randint(30,300)
+        name = "P" + str(i)
 
+        dicProcesses[name] = Process(initialMem, execTime)
+        dicProcessesTimes[name] = time.time()
+        processQueue.queue(name)
+
+        firstFit.allocate(name, initialMem)
+        bestFit.allocate(name, initialMem)
+        worstFit.allocate(name, initialMem)
+        buddySystem.allocate(name, initialMem)
+
+        time.sleep(random.randint(5, 20)/10)
+
+def killProcess(processName):
+    firstFit.killProcess(processName)
+    bestFit.killProcess(processName)
+    worstFit.killProcess(processName)
+    buddySystem.killProcess(processName)
+    del dicProcesses[processName]
+    del dicProcessesTimes[processName]
 
 if __name__ == '__main__':
-    dicProcesses = createProcesses(4, 10)
+    finished = False
+    t = threading.Thread(target=createProcesses, args=(100, 10))
 
-    firstFit = FirstFit(1024)
-    bestFit = BestFit(1024)
-    worstFit = WorstFit(1024)
-    buddySystem = BuddySystem(1024)
+    t.start()
 
-    # # FIRST FIT SIMULATION
-    # for process in dicProcesses:
-    #     print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
-    #     print("ANTES:\t\t" + str(firstFit.getMemory()))
-    #     firstFit.allocate(process, dicProcesses[process].getMemQuantity())
-    #     print("DESPUES:\t" + str(firstFit.getMemory()))
-    #     print('\n')
+    while(not finished):
+        print(firstFit.getMemory())
+        currentProcess = processQueue.pop()
+        # PEDIR MEMORIA (NEW)
+        if(random.randint(0,1) == 0):
+            heapSize = random.randint(1,128)
+            dicProcesses[currentProcess].addToHeap(heapSize)
+            firstFit.allocate(currentProcess, heapSize)
+            bestFit.allocate(currentProcess, heapSize)
+            worstFit.allocate(currentProcess, heapSize)
+            buddySystem.allocate(currentProcess, heapSize)
+            print("ASIGNADO")
 
-    # print("Remove process2:")
-    # print("ANTES:\t\t" + str(firstFit.getMemory()))
-    # firstFit.removeFromMemory(firstFit.getMemory()[2])
-    # print("DESPUES:\t" + str(firstFit.getMemory()))
-    # print('\n')
+        # LIBERAR MEMORIA (NEW)
+        if(random.randint(0,1) == 0):
+            heap = dicProcesses[currentProcess].getHeap()
+            if(heap):
+                toFree = random.choice(list(heap.keys()))
+                firstFit.removeFromMemory(currentProcess, heap[toFree])
+                print("LIBERADO")
 
-    # print("Remove process3:")
-    # print("ANTES:\t\t" + str(firstFit.getMemory()))
-    # firstFit.removeFromMemory(firstFit.getMemory()[3])
-    # print("DESPUES:\t" + str(firstFit.getMemory()))
-    # print('\n')
-
-    # BEST FIT SIMULATION
-    # for process in dicProcesses:
-    #     print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
-    #     print("ANTES:\t\t" + str(bestFit.getMemory()))
-    #     bestFit.allocate(process, dicProcesses[process].getMemQuantity())
-    #     print("DESPUES:\t" + str(bestFit.getMemory()))
-    #     print('\n')
-
-    # print("Remove process2:")
-    # print("ANTES:\t\t" + str(bestFit.getMemory()))
-    # bestFit.removeFromMemory(bestFit.getMemory()[2])
-    # print("DESPUES:\t" + str(bestFit.getMemory()))
-    # print('\n')
-
-    # print("Remove process3:")
-    # print("ANTES:\t\t" + str(bestFit.getMemory()))
-    # bestFit.removeFromMemory(bestFit.getMemory()[3])
-    # print("DESPUES:\t" + str(bestFit.getMemory()))
-    # print('\n')
-
-    # WORST FIT SIMULATION
-    # for process in dicProcesses:
-    #     print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
-    #     print("ANTES:\t\t" + str(worstFit.getMemory()))
-    #     worstFit.allocate(process, dicProcesses[process].getMemQuantity())
-    #     print("DESPUES:\t" + str(worstFit.getMemory()))
-    #     print('\n')
-
-    # print("Remove process2:")
-    # print("ANTES:\t\t" + str(worstFit.getMemory()))
-    # worstFit.removeFromMemory(worstFit.getMemory()[2])
-    # print("DESPUES:\t" + str(worstFit.getMemory()))
-    # print('\n')
-
-    # print("Remove process3:")
-    # print("ANTES:\t\t" + str(worstFit.getMemory()))
-    # worstFit.removeFromMemory(worstFit.getMemory()[3])
-    # print("DESPUES:\t" + str(worstFit.getMemory()))
-    # print('\n')
-
-    # BUDDY SYSTEM SIMULATION
-    for process in dicProcesses:
-        print(process + " size:\t" + str(dicProcesses[process].getMemQuantity()))
-        print("ANTES:\t\t" + str(buddySystem.getMemory()))
-        buddySystem.allocate(process, dicProcesses[process].getMemQuantity())
-        print("DESPUES:\t" + str(buddySystem.getMemory()))
-        print('\n')
-
-    print("Remove process2:")
-    print("ANTES:\t\t" + str(buddySystem.getMemory()))
-    buddySystem.removeFromMemory(buddySystem.getMemory()[2])
-    print("DESPUES:\t" + str(buddySystem.getMemory()))
-    print('\n')
-
-    print("Remove process3:")
-    print("ANTES:\t\t" + str(buddySystem.getMemory()))
-    buddySystem.removeFromMemory(buddySystem.getMemory()[3])
-    print("DESPUES:\t" + str(buddySystem.getMemory()))
-    print('\n')
+        if(time.time() - dicProcessesTimes[currentProcess] >= dicProcesses[currentProcess].getExecTime()):
+            killProcess(currentProcess)
+        if(not dicProcesses):
+            finished = True
+        processQueue.queue(currentProcess)
+        time.sleep(1)
+    
+    print("FINISHED")
     
     #draw(firstFit.getMemory(), firstFit.getMemory(), firstFit.getMemory(), firstFit.getMemory())

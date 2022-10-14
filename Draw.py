@@ -9,7 +9,7 @@ memories = {
     'BUDDY SYSTEM': [],
 }
 
-def draw(firstFit, bestFit, worstFit, buddySystem):
+def Draw(firstFit, bestFit, worstFit, buddySystem):
     loadMemories(firstFit, bestFit, worstFit, buddySystem)
     survey(memories, category_names)
     plt.show()

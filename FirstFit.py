@@ -30,23 +30,22 @@ class FirstFit:
 
     # FUNCTIONS
     def allocate(self, processName, processBlockSize):
-        isAsigned = False
-        for block in self.getMemory():
-            if(block[0] == 'E' and not isAsigned):
-                if(block[2] >= processBlockSize):
-                    newBlock = []
-                    index = self.getMemory().index(block)
-                    newBlock.append(processName)
-                    newBlock.append(block[1])
-                    newBlock.append(processBlockSize)
-                    self.insertInMemory(index, newBlock)
-                    isAsigned = True
-                    break
-        if not isAsigned:
+        if(processName not in self.getRefusedProcesses()):
+            isAsigned = False
             for block in self.getMemory():
-                if(block[0] == processName):
-                    self.removeFromMemory(block)
-            self.addRefusedProcess(processName)
+                if(block[0] == 'E' and not isAsigned):
+                    if(block[2] >= processBlockSize):
+                        newBlock = []
+                        index = self.getMemory().index(block)
+                        newBlock.append(processName)
+                        newBlock.append(block[1])
+                        newBlock.append(processBlockSize)
+                        self.insertInMemory(index, newBlock)
+                        isAsigned = True
+                        break
+            if not isAsigned:
+                self.killProcess(processName)
+                self.addRefusedProcess(processName)
             
 
     def addRefusedProcess(self, refusedProcess):
@@ -58,7 +57,6 @@ class FirstFit:
         tempMem = self.getMemory()
         index = tempMem.index(e)
         toRemove = []
-
         tempMem[index][0] = 'E'
         for i in range(len(tempMem) - 1):
             if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E'):
@@ -67,8 +65,31 @@ class FirstFit:
                 toRemove.append(tempMem[i])
         for e in toRemove:
             tempMem.remove(e)
-            
         self.setMemory(tempMem)
+
+    def removeFromMemory(self, processName, heapSize):
+        e = self.searchBlock(processName, heapSize)
+        if(e):
+            tempMem = self.getMemory()
+            index = tempMem.index(e)
+            toRemove = []
+            tempMem[index][0] = 'E'
+            for i in range(len(tempMem) - 1):
+                if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E'):
+                    tempMem[i + 1][1] = tempMem[i][1] 
+                    tempMem[i + 1][2] += tempMem[i][2]
+                    toRemove.append(tempMem[i])
+            for e in toRemove:
+                tempMem.remove(e)
+            self.setMemory(tempMem)
+        else:
+            print("ERROR: BLOQUE NO ENCONTRADO")
+
+    def searchBlock(self, processName, heapSize):
+        for block in self.getMemory():
+            if(block[0] == processName and block[2] == heapSize):
+                return block
+        return False
 
     def insertInMemory(self, index, e):
         tempBlock = self.getMemory()[index]
@@ -87,3 +108,9 @@ class FirstFit:
                 quantity += 1
                 freeMem += segment[2]
         return quantity, freeMem
+
+    def killProcess(self, processName):
+        currentMemory = self.getMemory()
+        for block in currentMemory:
+            if(block[0] == processName):
+                self.removeFromMemory(block)

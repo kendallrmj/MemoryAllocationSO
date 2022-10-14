@@ -30,26 +30,25 @@ class BestFit:
 
     # FUNCTIONS
     def allocate(self, processName, processBlockSize):
-        isAsigned = False
-        bestFit = 0
-        for block in self.getMemory():
-            if(block[0] == 'E'):
-                if(block[2] >= processBlockSize):
-                    if(bestFit == 0 or block[2] < bestFit[2]):
-                        bestFit = block
-                        isAsigned = True
-        if isAsigned:
-            newBlock = []
-            index = self.getMemory().index(bestFit)
-            newBlock.append(processName)
-            newBlock.append(bestFit[1])
-            newBlock.append(processBlockSize)
-            self.insertInMemory(index, newBlock)
-        else:
+        if(processName not in self.getRefusedProcesses()):
+            isAsigned = False
+            bestFit = 0
             for block in self.getMemory():
-                if(block[0] == processName):
-                    self.removeFromMemory(block)
-            self.addRefusedProcess(processName)
+                if(block[0] == 'E'):
+                    if(block[2] >= processBlockSize):
+                        if(bestFit == 0 or block[2] < bestFit[2]):
+                            bestFit = block
+                            isAsigned = True
+            if isAsigned:
+                newBlock = []
+                index = self.getMemory().index(bestFit)
+                newBlock.append(processName)
+                newBlock.append(bestFit[1])
+                newBlock.append(processBlockSize)
+                self.insertInMemory(index, newBlock)
+            else:
+                self.killProcess(processName)
+                self.addRefusedProcess(processName)
     
     def addRefusedProcess(self, refusedProcess):
         tempList = self.getRefusedProcesses()
@@ -89,3 +88,9 @@ class BestFit:
                 quantity += 1
                 freeMem += segment[2]
         return quantity, freeMem
+
+    def killProcess(self, processName):
+        currentMemory = self.getMemory()
+        for block in currentMemory:
+            if(block[0] == processName):
+                self.removeFromMemory(block)
