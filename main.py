@@ -14,10 +14,10 @@ dicProcesses = {}
 dicProcessesTimes = {}
 processQueue = Queue()
 
-firstFit = FirstFit(1024)
-bestFit = BestFit(1024)
-worstFit = WorstFit(1024)
-buddySystem = BuddySystem(1024)
+firstFit = FirstFit(2048)
+bestFit = BestFit(2048)
+worstFit = WorstFit(2048)
+buddySystem = BuddySystem(2048)
 
 def createProcesses(nProcesses, seed):
     random.seed(seed)
@@ -52,31 +52,74 @@ if __name__ == '__main__':
     t.start()
 
     while(not finished):
-        print(firstFit.getMemory())
         currentProcess = processQueue.pop()
+        choice = random.randint(0,2)
+
+        # LIBERAR MEMORIA (NEW)
+        if(choice == 0 and dicProcesses[currentProcess].getHeap()):
+            heap = dicProcesses[currentProcess].getHeap()
+            if(heap):
+                toFree = random.choice(list(heap.keys()))
+                firstFit.removeHeapFromMemory(currentProcess, heap[toFree])
+                bestFit.removeHeapFromMemory(currentProcess, heap[toFree])
+                worstFit.removeHeapFromMemory(currentProcess, heap[toFree])
+                buddySystem.removeHeapFromMemory(currentProcess, heap[toFree])
+                dicProcesses[currentProcess].removeFromHeap(toFree)
+
         # PEDIR MEMORIA (NEW)
-        if(random.randint(0,1) == 0):
+        if(choice == 1):
             heapSize = random.randint(1,128)
             dicProcesses[currentProcess].addToHeap(heapSize)
             firstFit.allocate(currentProcess, heapSize)
             bestFit.allocate(currentProcess, heapSize)
             worstFit.allocate(currentProcess, heapSize)
             buddySystem.allocate(currentProcess, heapSize)
-            print("ASIGNADO")
 
-        # LIBERAR MEMORIA (NEW)
-        if(random.randint(0,1) == 0):
-            heap = dicProcesses[currentProcess].getHeap()
-            if(heap):
-                toFree = random.choice(list(heap.keys()))
-                firstFit.removeFromMemory(currentProcess, heap[toFree])
-                print("LIBERADO")
-
+        # VERIFICA SI TERMINO EL PROCESO ACUTAL
         if(time.time() - dicProcessesTimes[currentProcess] >= dicProcesses[currentProcess].getExecTime()):
             killProcess(currentProcess)
+        else:
+            processQueue.queue(currentProcess)
+        
+        # VERIFICA SI TERMINARON TODOS LOS PROCESOS
         if(not dicProcesses):
             finished = True
-        processQueue.queue(currentProcess)
+
+        # print("FIRST FIT")
+        # quantity, freeMem = firstFit.getMemStatus()
+        # print("SEGMEMTOS DISPONIBLES:\t" + str(quantity))
+        # print("MEMORIA DISPONIBLE:\t" + str(freeMem))
+        # print("PROCESOS RECHAZADOS:\t" + str(firstFit.getRefusedProcesses()))
+        # print(firstFit.getMemory())
+        # print("-------------------------------------------------------------------------------------------------------")
+
+        # print("BEST FIT")
+        # quantity, freeMem = bestFit.getMemStatus()
+        # print("SEGMEMTOS DISPONIBLES:\t" + str(quantity))
+        # print("MEMORIA DISPONIBLE:\t" + str(freeMem))
+        # print("PROCESOS RECHAZADOS:\t" + str(bestFit.getRefusedProcesses()))
+        # print(bestFit.getMemory())
+        # print("-------------------------------------------------------------------------------------------------------")
+
+        # print("WORST FIT")
+        # quantity, freeMem = worstFit.getMemStatus()
+        # print("SEGMEMTOS DISPONIBLES:\t" + str(quantity))
+        # print("MEMORIA DISPONIBLE:\t" + str(freeMem))
+        # print("PROCESOS RECHAZADOS:\t" + str(worstFit.getRefusedProcesses()))
+        # print(worstFit.getMemory())
+        # print("-------------------------------------------------------------------------------------------------------")
+
+        # print("BUDDY SYSTEM")
+        # quantity, freeMem = buddySystem.getMemStatus()
+        # print("SEGMEMTOS DISPONIBLES:\t" + str(quantity))
+        # print("MEMORIA DISPONIBLE:\t" + str(freeMem))
+        # print("PROCESOS RECHAZADOS:\t" + str(buddySystem.getRefusedProcesses()))
+        # print(buddySystem.getMemory())
+        # print("-------------------------------------------------------------------------------------------------------")
+
+        # print("-------------------------------------------------------------------------------------------------------")
+        # print("-------------------------------------------------------------------------------------------------------")
+
         time.sleep(1)
     
     print("FINISHED")

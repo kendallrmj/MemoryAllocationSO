@@ -62,6 +62,22 @@ class BuddySystem:
                                 newBlock.append(processBlockSize)
                                 self.insertInMemory(index, newBlock)
 
+                                tempMem = list(reversed(self.getMemory()))
+                                changes = True                            
+                                while(changes):
+                                    toRemove = []
+                                    changes = False
+                                    for i in range(len(tempMem) - 1):
+                                        suma = tempMem[i][2] + tempMem[i + 1][2]
+                                        if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E' and suma == self.getIdealSize(suma)):
+                                            tempMem[i][1] = tempMem[i + 1][1] 
+                                            tempMem[i][2] += tempMem[i + 1][2]
+                                            toRemove.append(tempMem[i + 1])
+                                            changes = True
+                                    for e in toRemove:
+                                        tempMem.remove(e)
+                                self.setMemory(list(reversed(tempMem)))
+
                                 isAsigned = True
                                 break
                         
@@ -91,20 +107,25 @@ class BuddySystem:
         self.setRefusedProcesses(tempList)
     
     def removeFromMemory(self, e):
-        tempMem = self.getMemory()
+        tempMem = list(reversed(self.getMemory()))
         index = tempMem.index(e)
-        toRemove = []
+        changes = True
 
         tempMem[index][0] = 'E'
-        for i in range(len(tempMem) - 1):
-            if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E'):
-                tempMem[i + 1][1] = tempMem[i][1] 
-                tempMem[i + 1][2] += tempMem[i][2]
-                toRemove.append(tempMem[i])
-        for e in toRemove:
-            tempMem.remove(e)
+        while(changes):
+            toRemove = []
+            changes = False
+            for i in range(len(tempMem) - 1):
+                suma = tempMem[i][2] + tempMem[i + 1][2]
+                if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E' and suma == self.getIdealSize(suma)):
+                    tempMem[i][1] = tempMem[i + 1][1] 
+                    tempMem[i][2] += tempMem[i + 1][2]
+                    toRemove.append(tempMem[i + 1])
+                    changes = True
+            for e in toRemove:
+                tempMem.remove(e)
             
-        self.setMemory(tempMem)
+        self.setMemory(list(reversed(tempMem)))
 
     def insertInMemory(self, index, e):
         tempBlock = self.getMemory()[index]
@@ -126,6 +147,19 @@ class BuddySystem:
 
     def killProcess(self, processName):
         currentMemory = self.getMemory()
-        for block in currentMemory:
-            if(block[0] == processName):
-                self.removeFromMemory(block)
+        toRemove = [block for block in currentMemory if block[0] == processName]
+        for block in toRemove:
+            self.removeFromMemory(block)
+
+    def removeHeapFromMemory(self, processName, heapSize):
+        if(processName not in self.getRefusedProcesses()):
+            e = self.searchBlock(processName, heapSize)
+            if(e):
+                self.removeFromMemory(e)
+
+    def searchBlock(self, processName, heapSize):
+        heapSize = self.getIdealSize(heapSize)
+        for block in list(reversed(self.getMemory())):
+            if(block[0] == processName and block[2] == heapSize):
+                return block
+        return False
