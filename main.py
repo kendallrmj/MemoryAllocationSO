@@ -20,7 +20,7 @@ buddySystem = BuddySystem(2048)
 
 def createProcess(processNumber):
     initialMem = random.randint(1,128)
-    execTime = random.randint(10,20)
+    execTime = random.randint(30,300)
     name = "P" + str(processNumber)
 
     dicProcesses[name] = Process(initialMem, execTime)
@@ -65,7 +65,7 @@ if __name__ == '__main__':
         choice = random.randint(0,2)
 
         # CREA NUEVO PROCESO
-        if((time.time() - dicProcessesTimes["nextProcess"] >= nextProcessTime) and (processNumber < 25)):
+        if((time.time() - dicProcessesTimes["nextProcess"] >= nextProcessTime) and (processNumber < 100)):
             createProcess(processNumber)
             dicProcessesTimes["nextProcess"] = time.time()
             nextProcessTime = random.randint(5,20)/10
