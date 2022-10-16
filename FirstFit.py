@@ -54,18 +54,22 @@ class FirstFit:
         self.setRefusedProcesses(tempList)
     
     def removeFromMemory(self, e):
-        tempMem = list(reversed(self.getMemory()))
+        tempMem = self.getMemory()
         index = tempMem.index(e)
-        toRemove = []
+        changes = True
         tempMem[index][0] = 'E'
-        for i in range(len(tempMem) - 1):
-            if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E'):
-                tempMem[i][1] = tempMem[i + 1][1] 
-                tempMem[i][2] += tempMem[i + 1][2]
-                toRemove.append(tempMem[i + 1])
-        for e in toRemove:
-            tempMem.remove(e)
-        self.setMemory(list(reversed(tempMem)))
+        while(changes):
+            toRemove = []
+            changes = False
+            for i in range(len(tempMem) - 1):
+                if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E'):
+                    tempMem[i + 1][1] = tempMem[i][1] 
+                    tempMem[i + 1][2] += tempMem[i][2]
+                    toRemove.append(tempMem[i])
+                    changes = True
+            for e in toRemove:
+                tempMem.remove(e)
+        self.setMemory(tempMem)
 
     def insertInMemory(self, index, e):
         tempBlock = self.getMemory()[index]
@@ -98,7 +102,7 @@ class FirstFit:
                 self.removeFromMemory(e)
 
     def searchBlock(self, processName, heapSize):
-        for block in self.getMemory():
+        for block in list(reversed(self.getMemory())):
             if(block[0] == processName and block[2] == heapSize):
                 return block
         return False

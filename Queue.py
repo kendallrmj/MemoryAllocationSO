@@ -13,3 +13,6 @@ class Queue:
 
     def len(self):
         return len(self.items)
+
+    def clear(self):
+        self.items = []

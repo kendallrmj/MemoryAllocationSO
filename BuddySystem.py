@@ -1,3 +1,5 @@
+from asyncio.windows_events import NULL
+
 class BuddySystem:
 
     def __init__(self, memorySize):
@@ -5,6 +7,7 @@ class BuddySystem:
         self.setMemory([['E', 0, memorySize]])
         self.setMemorySize(memorySize)
         self.setRefusedProcesses([])
+        self.setBlockBrothers({})
     
     # GETTERS
     def getMemory(self):
@@ -15,6 +18,9 @@ class BuddySystem:
 
     def getMemorySize(self):
         return self.__memorySize
+
+    def getBlockBrothers(self):
+        return self.__blockBrothers
 
 
     # SETTERS
@@ -27,16 +33,19 @@ class BuddySystem:
     def setMemorySize(self, memorySize):
         self.__memorySize = memorySize
 
+    def setBlockBrothers(self, blockBrothers):
+        self.__blockBrothers = blockBrothers
+
 
     # FUNCTIONS
     def allocate(self, processName, processBlockSize):
         if(processName not in self.getRefusedProcesses()):
             isAsigned = False
             processBlockSize = self.getIdealSize(processBlockSize)
-            validStartPositions = self.getValidStartPositions(processBlockSize)
+
             for block in self.getMemory():
                 if(block[0] == 'E' and not isAsigned):
-                    if((block[1] in validStartPositions) and (block[2] >= processBlockSize)):
+                    if(block[2] == processBlockSize):
                         newBlock = []
                         index = self.getMemory().index(block)
                         newBlock.append(processName)
@@ -45,42 +54,39 @@ class BuddySystem:
                         self.insertInMemory(index, newBlock)
                         isAsigned = True
                         break
-                    else:
-                        for startPos in validStartPositions:
-                            if((startPos > block[1]) and (block[2] - (startPos - block[1])) >= processBlockSize):
+                    elif(block[2] > processBlockSize):
+                        while(not isAsigned):
+                            newBlock = []
+                            index = self.getMemory().index(block)
+                            newBlock.append('E')
+                            newBlock.append(block[1])
+                            newBlock.append(int(block[2]/2))
+                            self.insertInMemory(index, newBlock)
+                            block = newBlock
+                            if(block[2] == processBlockSize):
                                 newBlock = []
                                 index = self.getMemory().index(block)
-                                newBlock.append('E')
-                                newBlock.append(block[1])
-                                newBlock.append(startPos - block[1])
-                                self.insertInMemory(index, newBlock)
-
-                                newBlock = []
-                                index += 1
                                 newBlock.append(processName)
-                                newBlock.append(startPos)
+                                newBlock.append(block[1])
                                 newBlock.append(processBlockSize)
                                 self.insertInMemory(index, newBlock)
-
-                                tempMem = list(reversed(self.getMemory()))
-                                changes = True                            
-                                while(changes):
-                                    toRemove = []
-                                    changes = False
-                                    for i in range(len(tempMem) - 1):
-                                        suma = tempMem[i][2] + tempMem[i + 1][2]
-                                        if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E' and suma == self.getIdealSize(suma)):
-                                            tempMem[i][1] = tempMem[i + 1][1] 
-                                            tempMem[i][2] += tempMem[i + 1][2]
-                                            toRemove.append(tempMem[i + 1])
-                                            changes = True
-                                    for e in toRemove:
-                                        tempMem.remove(e)
-                                self.setMemory(list(reversed(tempMem)))
-
                                 isAsigned = True
-                                break
-                        
+                        break
+            tempMem = list(reversed(self.getMemory()))
+            changes = True                            
+            while(changes):
+                toRemove = []
+                changes = False
+                for i in range(len(tempMem) - 1):
+                    suma = tempMem[i][2] + tempMem[i + 1][2]
+                    if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E' and suma == self.getIdealSize(suma)):
+                        tempMem[i][1] = tempMem[i + 1][1] 
+                        tempMem[i][2] += tempMem[i + 1][2]
+                        toRemove.append(tempMem[i + 1])
+                        changes = True
+                for e in toRemove:
+                    tempMem.remove(e)
+            self.setMemory(list(reversed(tempMem)))
             if not isAsigned:
                 self.killProcess(processName)
                 self.addRefusedProcess(processName)
@@ -93,21 +99,13 @@ class BuddySystem:
             res = 2 ** potencia
         return res
 
-    def getValidStartPositions(self, blockSize):
-        L = []
-        res = 0
-        while(res < self.getMemorySize()):
-            L.append(res)
-            res += blockSize
-        return L
-
     def addRefusedProcess(self, refusedProcess):
         tempList = self.getRefusedProcesses()
         tempList.append(refusedProcess)
         self.setRefusedProcesses(tempList)
     
     def removeFromMemory(self, e):
-        tempMem = list(reversed(self.getMemory()))
+        tempMem = self.getMemory()
         index = tempMem.index(e)
         changes = True
 
@@ -116,16 +114,17 @@ class BuddySystem:
             toRemove = []
             changes = False
             for i in range(len(tempMem) - 1):
-                suma = tempMem[i][2] + tempMem[i + 1][2]
-                if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E' and suma == self.getIdealSize(suma)):
-                    tempMem[i][1] = tempMem[i + 1][1] 
-                    tempMem[i][2] += tempMem[i + 1][2]
-                    toRemove.append(tempMem[i + 1])
+                if(tempMem[i][0] == 'E' and tempMem[i + 1][0] == 'E' and self.getBrother(tempMem[i]) == tempMem[i + 1]):
+                    tempDic = self.getBlockBrothers()
+                    del tempDic[str(tempMem[i])]
+                    self.setBlockBrothers(tempDic)
+                    tempMem[i + 1][1] = tempMem[i][1] 
+                    tempMem[i + 1][2] += tempMem[i][2]
+                    toRemove.append(tempMem[i])
                     changes = True
             for e in toRemove:
-                tempMem.remove(e)
-            
-        self.setMemory(list(reversed(tempMem)))
+                tempMem.remove(e)    
+        self.setMemory(tempMem)
 
     def insertInMemory(self, index, e):
         tempBlock = self.getMemory()[index]
@@ -133,7 +132,12 @@ class BuddySystem:
         tempMem.insert(index, e)
         tempMem.remove(tempBlock)
         if(tempBlock[2] > 0 and (tempBlock[2] - e[2]) > 0):
-            tempMem.insert(index + 1, ['E', e[1] + e[2], tempBlock[2] - e[2]])
+            newBlock = ['E', e[1] + e[2], tempBlock[2] - e[2]]
+            tempMem.insert(index + 1, newBlock)
+            tempBrothersDic = self.getBlockBrothers()
+            e[0] = 'E'
+            tempBrothersDic[str(e)] =  newBlock
+            self.setBlockBrothers(tempBrothersDic)
         self.setMemory(tempMem)
 
     def getMemStatus(self):
@@ -163,3 +167,13 @@ class BuddySystem:
             if(block[0] == processName and block[2] == heapSize):
                 return block
         return False
+
+    def finish(self):
+        self.setMemory([['E', 0, self.getMemorySize()]])
+        self.setBlockBrothers({})
+    
+    def getBrother(self, block):
+        if(str(block) in self.getBlockBrothers()):
+            return self.getBlockBrothers()[str(block)]
+        else:
+            return 0
