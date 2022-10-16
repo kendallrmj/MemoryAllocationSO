@@ -81,6 +81,22 @@ def draw(choice):
                 color = colors[int(process[i])]
             bot = np.sum(data[:i], axis = 0)
             plt.bar(X, data[i],bottom = bot,color = color)
+        
+        quantityFirst, freeMemFirst = firstFit.getMemStatus()
+        quantityBest, freeMemBest = bestFit.getMemStatus()
+        quantityWorst, freeMemWorst = worstFit.getMemStatus()
+        quantityBuddy, freeMemBuddy = buddySystem.getMemStatus()        
+        textFirst = plt.gcf().text(0.08, 0.91, "Algoritmo: First Fit \nMemoria disponible: " + str(freeMemFirst) + "\nSegmentos disponibles: "+str(quantityFirst) +"\nProcesos rechazados: "+ str(len(firstFit.getRefusedProcesses())) , fontsize=10)
+        textBest = plt.gcf().text(0.2, 0.91, "Algoritmo: Best Fit \nMemoria disponible: " + str(freeMemBest) + "\nSegmentos disponibles: "+str(quantityBest) +"\nProcesos rechazados: "+ str(len(bestFit.getRefusedProcesses())) , fontsize=10)
+        textWorst = plt.gcf().text(0.32, 0.91, "Algoritmo: Worst Fit \nMemoria disponible: " + str(freeMemWorst) + "\nSegmentos disponibles: "+str(quantityWorst) +"\nProcesos rechazados: "+ str(len(worstFit.getRefusedProcesses())) , fontsize=10)
+        textBuddy = plt.gcf().text(0.45, 0.91, "Algoritmo: Buddy System \nMemoria disponible: " + str(freeMemBuddy) + "\nSegmentos disponibles: "+str(quantityBuddy) +"\nProcesos rechazados: "+ str(len(buddySystem.getRefusedProcesses())) , fontsize=10)
+
+        plt.pause(0.1)
+        textFirst.remove()
+        textBest.remove()
+        textWorst.remove()
+        textBuddy.remove()
+
 
 
 if __name__ == '__main__':
@@ -161,7 +177,6 @@ if __name__ == '__main__':
             finished = True
     
         draw(choice)
-        plt.pause(0.1)
         
     plt.show()
     print("FINISHED")
