@@ -1,13 +1,15 @@
 import random
 import time
-
-from Process import Process
+import numpy as np
+import matplotlib.pyplot as plt
+from process import Process
 from FirstFit import FirstFit
 from BestFit import BestFit
 from WorstFit import WorstFit
 from BuddySystem import BuddySystem
 from Queue import Queue
 from Draw import Draw
+
 
 dicProcesses = {}
 dicProcessesTimes = {}
@@ -18,10 +20,18 @@ bestFit = BestFit(2048)
 worstFit = WorstFit(2048)
 buddySystem = BuddySystem(2048)
 
+colors=[]
+for i in range(0,101):
+    r = lambda: random.randint(0,255)
+    color='#%02X%02X%02X' % (r(),r(),r())    
+    while color in colors:
+        color='#%02X%02X%02X' % (r(),r(),r())
+    colors.append(color)
+
 def createProcess(processNumber):
     initialMem = random.randint(1,128)
     execTime = random.randint(30,300)
-    name = "P" + str(processNumber)
+    name = str(processNumber)
 
     dicProcesses[name] = Process(initialMem, execTime)
     dicProcessesTimes[name] = time.time()
@@ -105,8 +115,37 @@ if __name__ == '__main__':
             finishProcesses()
             finished = True
     
-        time.sleep(0.1)
+        dataArray=[[x[2],0,0,0] for x in firstFit.getMemory()]
+        process = [x[0] for x in firstFit.getMemory()]
+        
+        dataBest=[[0,x[2],0,0] for x in bestFit.getMemory()]
+        processBest = [x[0] for x in bestFit.getMemory()]
 
+        dataWorst=[[0,0,x[2],0] for x in worstFit.getMemory()]
+        processWorst = [x[0] for x in worstFit.getMemory()]
+
+        dataBuddy=[[0,0,0,x[2]] for x in buddySystem.getMemory()]
+        processBuddy = [x[0] for x in buddySystem.getMemory()]
+
+        dataArray.extend(dataBest)
+        dataArray.extend(dataWorst)
+        dataArray.extend(dataBuddy)
+        
+        process.extend(processBest)
+        process.extend(processWorst)
+        process.extend(processBuddy)
+        
+        data = np.array(dataArray)
+        X = np.arange(data.shape[1])
+        for i in range(data.shape[0]):
+            if process[i] == 'E':
+                color = colors[100]
+            else:
+                color = colors[int(process[i])]
+            plt.bar(X, data[i],bottom = np.sum(data[:i], axis = 0),color = color)
+        plt.pause(0.1)
+        
+    plt.show()
     print("FIRST FIT")
     quantity, freeMem = firstFit.getMemStatus()
     print("SEGMEMTOS DISPONIBLES:\t" + str(quantity))
@@ -140,5 +179,3 @@ if __name__ == '__main__':
     print("-------------------------------------------------------------------------------------------------------")
     
     print("FINISHED")
-    
-    #draw(firstFit.getMemory(), firstFit.getMemory(), firstFit.getMemory(), firstFit.getMemory())
