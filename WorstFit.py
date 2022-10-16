@@ -108,3 +108,11 @@ class WorstFit:
             if(block[0] == processName and block[2] == heapSize):
                 return block
         return False
+
+    def getDataToDraw(self):
+        dataArray = []
+        process = []
+        for x in self.getMemory():
+            dataArray.append([0,0,x[2],0])
+            process.append(x[0])
+        return dataArray, process

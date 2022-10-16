@@ -1,5 +1,3 @@
-from asyncio.windows_events import NULL
-
 class BuddySystem:
 
     def __init__(self, memorySize):
@@ -177,3 +175,11 @@ class BuddySystem:
             return self.getBlockBrothers()[str(block)]
         else:
             return 0
+
+    def getDataToDraw(self):
+        dataArray = []
+        process = []
+        for x in self.getMemory():
+            dataArray.append([0,0,0,x[2]])
+            process.append(x[0])
+        return dataArray, process
