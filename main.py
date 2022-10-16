@@ -9,7 +9,7 @@ from WorstFit import WorstFit
 from BuddySystem import BuddySystem
 from Queue import Queue
 from Draw import Draw
-
+from matplotlib.lines import Line2D
 
 dicProcesses = {}
 dicProcessesTimes = {}
@@ -70,6 +70,29 @@ if __name__ == '__main__':
     nextProcessTime = random.randint(5,20)/10
     processNumber += 1
 
+   
+    custom_lines1 = [Line2D([0], [0], color=colors[x], lw=4) for x in range(25)]
+    custom_lines2 = [Line2D([0], [0], color=colors[x], lw=4) for x in range(25,50)]
+    custom_lines3 = [Line2D([0], [0], color=colors[x], lw=4) for x in range(50,75)]
+    custom_lines4 = [Line2D([0], [0], color=colors[x], lw=4) for x in range(75,100)]
+    
+    fig, ax = plt.subplots()
+    legend1 = plt.legend(custom_lines1, ["P"+str(x) for x in range(25)],loc='upper left', bbox_to_anchor=(1, 1))
+    legend2 = plt.legend(custom_lines2, ["P"+str(x) for x in range(25,50)],loc='upper left', bbox_to_anchor=(1.1, 1))
+    legend3 = plt.legend(custom_lines3, ["P"+str(x) for x in range(50,75)],loc='upper left', bbox_to_anchor=(1.2, 1))
+    legend4 = plt.legend(custom_lines4, ["P"+str(x) for x in range(75,100)],loc='upper left', bbox_to_anchor=(1.3, 1))
+    legendRam = plt.legend([Line2D([0], [0], color=colors[100], lw=4)], ["RAM"],loc='lower left', bbox_to_anchor=(1, 1))
+    
+    #plt.figure()
+    ax.add_artist(legend1)
+    ax.add_artist(legend2)
+    ax.add_artist(legend3)
+    ax.add_artist(legend4)
+    ax.add_artist(legendRam)    
+    
+    plt.subplots_adjust(left=0.05,right=0.57, bottom=0.21)
+    plt.get_current_fig_manager().full_screen_toggle()
+    
     while(not finished):
         currentProcess = processQueue.pop()
         choice = random.randint(0,2)
