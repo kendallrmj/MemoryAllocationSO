@@ -133,7 +133,10 @@ if __name__ == '__main__':
     ax.add_artist(legendRam)    
     
     plt.subplots_adjust(left=0.05,right=0.57, bottom=0.21)
-    plt.get_current_fig_manager().full_screen_toggle()
+    mng = plt.get_current_fig_manager()
+    mng.resize(*mng.window.maxsize())
+    #windows OS full screen
+    #plt.get_current_fig_manager().full_screen_toggle() 
     
     while(not finished):
         currentProcess = processQueue.pop()
