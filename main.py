@@ -20,12 +20,13 @@ worstFit = WorstFit(2048)
 buddySystem = BuddySystem(2048)
 
 colors=[]
-for i in range(0,101):
-    r = lambda: random.randint(0,255)
-    color='#%02X%02X%02X' % (r(),r(),r())    
+for i in range(100):
+    r = lambda: random.randint(15,255)
+    color='#%02X%02X%02X' % (r(),r(),r())
     while color in colors:
         color='#%02X%02X%02X' % (r(),r(),r())
     colors.append(color)
+colors.append('#%02X%02X%02X' % (0,0,0))
 
 def createProcess(processNumber):
     initialMem = random.randint(1,128)
